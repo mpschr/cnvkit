@@ -68,11 +68,11 @@ def interval_coverages_count(bed_fname, bam_fname, min_mapq):
     for chrom, subregions in RA.read(bed_fname).by_chromosome():
         logging.info("Processing chromosome %s of %s",
                      chrom, os.path.basename(bam_fname))
-        for _chrom, start, end, name, in subregions.coords(["name"]):
+        for _chrom, start, end, gene, in subregions.coords(["gene"]):
             count, depth = region_depth_count(bamfile, chrom, start, end,
                                               min_mapq)
             yield [count,
-                   (chrom, start, end, name,
+                   (chrom, start, end, gene,
                     math.log(depth, 2) if depth else NULL_LOG2_COVERAGE)]
 
 
@@ -106,10 +106,10 @@ def region_depth_count(bamfile, chrom, start, end, min_mapq):
 def interval_coverages_pileup(bed_fname, bam_fname, min_mapq):
     """Calculate log2 coverages in the BAM file at each interval."""
     logging.info("Processing reads in %s", os.path.basename(bam_fname))
-    for chrom, start, end, name, count, depth in bedcov(bed_fname, bam_fname,
+    for chrom, start, end, gene, count, depth in bedcov(bed_fname, bam_fname,
                                                         min_mapq):
         yield [count,
-               (chrom, start, end, name,
+               (chrom, start, end, gene,
                 math.log(depth, 2) if depth else NULL_LOG2_COVERAGE)]
 
 
@@ -137,10 +137,10 @@ def bedcov(bed_fname, bam_fname, min_mapq):
     for line in lines:
         fields = line.split('\t')
         if len(fields) == 5:
-            chrom, start_s, end_s, name, basecount_s = fields
+            chrom, start_s, end_s, gene, basecount_s = fields
         elif len(fields) == 4:
             chrom, start_s, end_s, basecount_s = fields
-            name = "-"
+            gene = "-"
         else:
             raise RuntimeError("Bad line from bedcov:\n" + line)
         start, end, basecount = map(int, (start_s, end_s, basecount_s.strip()))
@@ -152,7 +152,7 @@ def bedcov(bed_fname, bam_fname, min_mapq):
         else:
             # User-supplied bins might be oddly constructed
             count = mean_depth = 0
-        yield chrom, start, end, name, count, mean_depth
+        yield chrom, start, end, gene, count, mean_depth
 
 
 def bam_total_reads(bam_fname):
