@@ -501,7 +501,7 @@ class GenomicArray(object):
         with ngfrills.safe_write(outfile or sys.stdout) as handle:
             self.data.to_csv(handle, index=False, sep='\t', float_format='%.6g')
 
-    def _get_gene_map(self) -> OrderedDict:
+    def _get_gene_map(self):
         """
         Returns a (ordered) dictionary of unique gene names and the data indices of their segments
         in the order of occurrence (genomic order)
