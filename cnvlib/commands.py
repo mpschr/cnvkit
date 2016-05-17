@@ -1392,9 +1392,10 @@ def do_gainloss(cnarr, segments=None, threshold=0.2, min_probes=3,
         segments = segments.shift_xx(male_reference, is_sample_female)
         gainloss = pd.DataFrame(reports.gainloss_by_segment(cnarr, segments, threshold,
                                                skip_low))
+        gainloss = gainloss.reindex(columns= ["gene"] + [x for x in gainloss.columns if x != "gene"])
     else:
         logging.info("Creating gainloss report from log2 ratios")
-        columns = cnarr.data.columns.tolist() + ["probes"]
+        columns = ["gene"] + [x for x in cnarr._required_columns if x != "gene"] + ["probes"]
         gainloss = pd.DataFrame(reports.gainloss_by_gene(cnarr, threshold, skip_low), columns=columns)
     return gainloss.query("probes >= {}".format(min_probes))
 
